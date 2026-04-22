@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PerformanceAnalysis.Application.Auth.DTOs;
 
 namespace PerformanceAnalysis.Controllers;
@@ -41,8 +42,50 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = ex.Message });
         }
     }
+
+    [HttpPost("login-with-cookie")]
+    public async Task<IActionResult> LoginWithCookie([FromBody] LoginWithCookieRequest request)
+    {
+        try
+        {
+            var result = await _authService.LoginWithCookieAsync(request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        try
+        {
+            await _authService.LogoutAsync();
+            return Ok(new { message = "Выход выполнен успешно" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    //эндпоинт для тестирования авторизации через Cookie
+    [HttpGet("me")]
+    [Authorize]
+    public IActionResult GetCurrentUser()
+    {
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+
+        return Ok(new
+        {
+            IsAuthenticated = User.Identity?.IsAuthenticated ?? false,
+            AuthenticationType = User.Identity?.AuthenticationType,
+            Claims = claims
+        });
+    }
 }
-
-
 
 
