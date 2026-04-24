@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using PerformanceAnalysis.Application.Auth;
+using PerformanceAnalysis.Infrastructure.Reports;
 using System.Data;
 using System.Text;
 
@@ -18,6 +19,9 @@ namespace PerformanceAnalysis
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddScoped<IDapperExecutor, DapperExecutor>();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
